@@ -186,14 +186,14 @@ class BenchmarkTest(ABC):
     def is_supported_by(self, library):
         if library == "imgaug":
             return hasattr(self, "imgaug_transform")
-        elif library == "augmentor":
+        if library == "augmentor":
             return hasattr(self, "augmentor_op") or hasattr(self, "augmentor_pipeline")
-        elif library == "solt":
+        if library == "solt":
             return hasattr(self, "solt_stream")
-        elif library == "torchvision":
+        if library == "torchvision":
             return hasattr(self, "torchvision_transform")
-        else:
-            return hasattr(self, library)
+
+        return hasattr(self, library)
 
     def run(self, library, imgs):
         transform = getattr(self, library)
@@ -210,8 +210,8 @@ class HorizontalFlip(BenchmarkTest):
     def albumentations(self, img):
         if img.ndim == 3 and img.shape[2] > 1 and img.dtype == np.uint8:
             return albumentations.hflip_cv2(img)
-        else:
-            return albumentations.hflip(img)
+
+        return albumentations.hflip(img)
 
     def torchvision_transform(self, img):
         return torchvision.hflip(img)
@@ -389,7 +389,7 @@ class RandomCrop64(BenchmarkTest):
         return np.ascontiguousarray(img)
 
     def torchvision_transform(self, img):
-        return torchvision.crop(img, i=0, j=0, h=64, w=64)
+        return torchvision.crop(img, top=0, left=0, height=64, width=64)
 
     def solt(self, img):
         dc = sld.DataContainer(img, "I")
@@ -421,7 +421,7 @@ class RandomSizedCrop_64_512(BenchmarkTest):
         return np.array(img, np.uint8, copy=True)
 
     def torchvision_transform(self, img):
-        img = torchvision.crop(img, i=0, j=0, h=64, w=64)
+        img = torchvision.crop(img, top=0, left=0, height=64, width=64)
         return torchvision.resize(img, (512, 512))
 
 

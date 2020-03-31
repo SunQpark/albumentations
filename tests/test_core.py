@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+from unittest import mock
+from unittest.mock import Mock, MagicMock, call
+
 import cv2
 import numpy as np
 import pytest
@@ -8,7 +11,6 @@ from albumentations.core.transforms_interface import to_tuple, ImageOnlyTransfor
 from albumentations.augmentations.bbox_utils import check_bboxes
 from albumentations.core.composition import OneOrOther, Compose, OneOf, PerChannel, ReplayCompose
 from albumentations.augmentations.transforms import HorizontalFlip, Rotate, Blur, MedianBlur
-from .compat import mock, MagicMock, Mock, call
 
 
 def test_one_or_other():
@@ -99,7 +101,7 @@ def test_additional_targets(image, mask):
 def test_check_bboxes_with_correct_values():
     try:
         check_bboxes([[0.1, 0.5, 0.8, 1.0], [0.2, 0.5, 0.5, 0.6, 99]])
-    except Exception as e:
+    except Exception as e:  # skipcq: PYL-W0703
         pytest.fail("Unexpected Exception {!r}".format(e))
 
 
@@ -142,7 +144,7 @@ def test_per_channel_multi():
 
 def test_deterministic_oneof():
     aug = ReplayCompose([OneOf([HorizontalFlip(), Blur()])], p=1)
-    for i in range(10):
+    for _ in range(10):
         image = (np.random.random((8, 8)) * 255).astype(np.uint8)
         image2 = np.copy(image)
         data = aug(image=image)
@@ -153,7 +155,7 @@ def test_deterministic_oneof():
 
 def test_deterministic_one_or_other():
     aug = ReplayCompose([OneOrOther(HorizontalFlip(), Blur())], p=1)
-    for i in range(10):
+    for _ in range(10):
         image = (np.random.random((8, 8)) * 255).astype(np.uint8)
         image2 = np.copy(image)
         data = aug(image=image)

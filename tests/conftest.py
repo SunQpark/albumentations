@@ -1,15 +1,14 @@
-import os
+import sys
 import warnings
+import multiprocessing
 
 import numpy as np
 import pytest
 
 
-skip_appveyor = pytest.mark.skipif("APPVEYOR" in os.environ, reason="Skipping test in AppVeyor")
-
 try:
-    import torch
-    import torchvision
+    import torch  # skipcq: PYL-W0611
+    import torchvision  # skipcq: PYL-W0611
 
     torch_available = True
 except ImportError:
@@ -55,3 +54,15 @@ def keypoints():
 @pytest.fixture
 def float_image():
     return np.random.uniform(low=0.0, high=1.0, size=(100, 100, 3)).astype("float32")
+
+
+@pytest.fixture
+def multiprocessing_context():
+    # Usage of `fork` as a start method for multiprocessing could lead to deadlocks on macOS.
+    # Because `fork` was the default start method for macOS until Python 3.8
+    # we had to manually set the start method to `spawn` to avoid those issues.
+    if sys.platform == "darwin":
+        method = "spawn"
+    else:
+        method = None
+    return multiprocessing.get_context(method)
